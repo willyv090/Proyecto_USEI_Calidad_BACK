@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.usei</groupId>
 	<artifactId>usei</artifactId>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>usei</name>
 	<description>Proyecto del área de USEI de la UCB</description>
@@ -81,7 +81,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-tomcat</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>
