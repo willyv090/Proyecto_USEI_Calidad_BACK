@@ -19,7 +19,7 @@ docker build -t image-usei .
 2. Crear un contenedor en base a la imagen
 
 ```
-docker run -d -p 5433:5432 --name usei-cont image-usei
+docker run -d -p 5434:5432 --name calidad-usei-cont image-usei
 ```
 
 3. Para correr el docker YA creado
