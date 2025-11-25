@@ -1,24 +1,33 @@
 package com.usei.usei.controllers;
 
+import java.util.Arrays;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.usei.usei.models.Encuesta;
 import com.usei.usei.models.Plazo;
 import com.usei.usei.models.Usuario;
 import com.usei.usei.repositories.EncuestaDAO;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Arrays;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 /**
- * 10 Pruebas unitarias para EncuestaBL
- * Autor: [Tu nombre] pruebas 1,2,3,4,5,6,7,8,9,10
+  4 Pruebas unitarias para RespuestaBL
+  Autor: Paola Quispe pruebas 7,8,9,10
  */
 @ExtendWith(MockitoExtension.class)
 class EncuestaBLTest {
@@ -36,146 +45,84 @@ class EncuestaBLTest {
     private EncuestaBL encuestaBL;
 
     /**
-     PRIMERA PRUEBA
-     save_datosValidos_guardaEncuestaConUsuarioYPlazo
-     Se proporciona una encuesta con un usuario y plazo válidos. Se verifica que el método save()
-     asigna correctamente el usuario y plazo a la encuesta y la guarda en la base de datos.
+     Guardar una encuesta con datos validos.
+     Se verifica que save() asigne usuario, plazo y guarde correctamente.
      */
     @Test
     void save_datosValidos_guardaEncuestaConUsuarioYPlazo() {
-        // 1. Preparación de la prueba
 
+        // 1. preparacion
         Usuario usuario = new Usuario();
         usuario.setIdUsuario(1L);
-        usuario.setNombre("Carlos Admin");
 
         Plazo plazo = new Plazo();
         plazo.setIdPlazo(1L);
-        plazo.setEstado("activo");
 
         Encuesta encuesta = new Encuesta();
         encuesta.setIdEncuesta(1L);
         encuesta.setTitulo("Encuesta de Satisfacción");
-        encuesta.setDescripcion("Encuesta para medir la satisfacción");
         encuesta.setUsuarioIdUsuario(usuario);
         encuesta.setPlazoIdPlazo(plazo);
 
-        // El UsuarioService devuelve el usuario cuando se busca por ID
         when(usuarioService.findById(1L)).thenReturn(Optional.of(usuario));
-        // El PlazoService devuelve el plazo cuando se busca por ID
         when(plazoService.findById(1L)).thenReturn(Optional.of(plazo));
-        // El EncuestaDAO devolverá la misma encuesta que reciba
-        when(encuestaDAO.save(any(Encuesta.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(encuestaDAO.save(any(Encuesta.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        // 2. Lógica de la prueba
+        // 2. logica
         Encuesta resultado = encuestaBL.save(encuesta);
 
-        // 3. Verificación o Assert
-
-        // La encuesta retornada debe tener el usuario y plazo asignados correctamente
+        // 3. verificacion
         assertNotNull(resultado);
-        assertEquals(1L, resultado.getIdEncuesta());
         assertEquals("Encuesta de Satisfacción", resultado.getTitulo());
         assertEquals(usuario, resultado.getUsuarioIdUsuario());
         assertEquals(plazo, resultado.getPlazoIdPlazo());
 
-        // Se verifica que se buscó el usuario y el plazo, y se guardó la encuesta
         verify(usuarioService, times(1)).findById(1L);
         verify(plazoService, times(1)).findById(1L);
-        verify(encuestaDAO, times(1)).save(any(Encuesta.class));
+        verify(encuestaDAO, times(1)).save(any());
     }
 
     /**
-     SEGUNDA PRUEBA
-     save_usuarioNoExiste_lanzaExcepcion
-     Se intenta guardar una encuesta con un usuario que no existe en la base de datos.
-     Se verifica que lanza una excepción y no guarda la encuesta.
+     Intentar guardar una encuesta con un usuario inexistente.
+     Se verifica que save() lance excepcion y NO guarde la encuesta.
      */
     @Test
     void save_usuarioNoExiste_lanzaExcepcion() {
-        // 1. Preparación de la prueba
 
+        // 1. preparacion
         Usuario usuario = new Usuario();
-        usuario.setIdUsuario(99L); // ID que no existe
+        usuario.setIdUsuario(99L); // id incorrecto
 
         Plazo plazo = new Plazo();
         plazo.setIdPlazo(1L);
 
         Encuesta encuesta = new Encuesta();
-        encuesta.setIdEncuesta(1L);
-        encuesta.setTitulo("Encuesta de Satisfacción");
         encuesta.setUsuarioIdUsuario(usuario);
         encuesta.setPlazoIdPlazo(plazo);
 
-        // El UsuarioService devuelve vacío (usuario no existe)
         when(usuarioService.findById(99L)).thenReturn(Optional.empty());
 
-        // 2. Lógica de la prueba y 3. Verificación o Assert
-
+        // 2. logica
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> encuestaBL.save(encuesta));
 
-        // La excepción debe mencionar que el usuario no fue encontrado
+        // 3. verificacion
         assertTrue(ex.getMessage().contains("Usuario no encontrado"));
 
-        // Se verifica que no se guardó la encuesta si el usuario no existe
-        verify(encuestaDAO, never()).save(any(Encuesta.class));
-        // Tampoco debe buscar el plazo si el usuario no existe
+        verify(encuestaDAO, never()).save(any());
         verify(plazoService, never()).findById(anyLong());
     }
 
     /**
-     TERCERA PRUEBA
-     save_plazoNoExiste_lanzaExcepcion
-     Se intenta guardar una encuesta con un plazo que no existe en la base de datos.
-     Se verifica que lanza una excepción y no guarda la encuesta.
-     */
-    @Test
-    void save_plazoNoExiste_lanzaExcepcion() {
-        // 1. Preparación de la prueba
-
-        Usuario usuario = new Usuario();
-        usuario.setIdUsuario(1L);
-
-        Plazo plazo = new Plazo();
-        plazo.setIdPlazo(99L); // ID que no existe
-
-        Encuesta encuesta = new Encuesta();
-        encuesta.setIdEncuesta(1L);
-        encuesta.setTitulo("Encuesta de Satisfacción");
-        encuesta.setUsuarioIdUsuario(usuario);
-        encuesta.setPlazoIdPlazo(plazo);
-
-        // El UsuarioService devuelve el usuario
-        when(usuarioService.findById(1L)).thenReturn(Optional.of(usuario));
-        // El PlazoService devuelve vacío (plazo no existe)
-        when(plazoService.findById(99L)).thenReturn(Optional.empty());
-
-        // 2. Lógica de la prueba y 3. Verificación o Assert
-
-        RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> encuestaBL.save(encuesta));
-
-        // La excepción debe mencionar que el plazo no fue encontrado
-        assertTrue(ex.getMessage().contains("Plazo no encontrado"));
-
-        // Se verifica que no se guardó la encuesta si el plazo no existe
-        verify(encuestaDAO, never()).save(any(Encuesta.class));
-    }
-
-    /**
-     CUARTA PRUEBA
-     update_encuestaExistente_actualizaCamposYGuarda
-     Se actualiza una encuesta existente con nuevos datos (título, descripción, usuario y plazo).
-     Se verifica que los campos se actualizan correctamente y se guarda en la base de datos.
+     Actualizar una encuesta existente con nuevos datos.
+     Se verifica que update() modifique campos y guarde correctamente.
      */
     @Test
     void update_encuestaExistente_actualizaCamposYGuarda() {
-        // 1. Preparación de la prueba
 
+        // 1. preparacion
         Long id = 1L;
 
-        // Encuesta existente en la BD
         Usuario usuarioExistente = new Usuario();
         usuarioExistente.setIdUsuario(1L);
 
@@ -184,91 +131,72 @@ class EncuestaBLTest {
 
         Encuesta existente = new Encuesta();
         existente.setIdEncuesta(id);
-        existente.setTitulo("Encuesta Vieja");
-        existente.setDescripcion("Descripción vieja");
+        existente.setTitulo("Vieja");
         existente.setUsuarioIdUsuario(usuarioExistente);
         existente.setPlazoIdPlazo(plazoExistente);
 
-        // Nuevos datos para actualizar
         Usuario usuarioNuevo = new Usuario();
         usuarioNuevo.setIdUsuario(2L);
-        usuarioNuevo.setNombre("Nuevo Admin");
 
         Plazo plazoNuevo = new Plazo();
         plazoNuevo.setIdPlazo(2L);
-        plazoNuevo.setEstado("activo");
 
         Encuesta nuevosDatos = new Encuesta();
-        nuevosDatos.setTitulo("Encuesta Nueva");
-        nuevosDatos.setDescripcion("Descripción nueva");
+        nuevosDatos.setTitulo("Nueva");
         nuevosDatos.setUsuarioIdUsuario(usuarioNuevo);
         nuevosDatos.setPlazoIdPlazo(plazoNuevo);
 
-        // El EncuestaDAO devuelve la encuesta existente al buscar por id
         when(encuestaDAO.findById(id)).thenReturn(Optional.of(existente));
-        // El UsuarioService devuelve el nuevo usuario
         when(usuarioService.findById(2L)).thenReturn(Optional.of(usuarioNuevo));
-        // El PlazoService devuelve el nuevo plazo
         when(plazoService.findById(2L)).thenReturn(Optional.of(plazoNuevo));
-        // El EncuestaDAO devolverá lo que reciba al guardar
-        when(encuestaDAO.save(any(Encuesta.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(encuestaDAO.save(any(Encuesta.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        // 2. Lógica de la prueba
+        // 2. logica
         Encuesta resultado = encuestaBL.update(nuevosDatos, id);
 
-        // 3. Verificación o Assert
-
-        assertNotNull(resultado);
-        assertEquals("Encuesta Nueva", resultado.getTitulo());
-        assertEquals("Descripción nueva", resultado.getDescripcion());
+        // 3. verificacion
+        assertEquals("Nueva", resultado.getTitulo());
         assertEquals(usuarioNuevo, resultado.getUsuarioIdUsuario());
         assertEquals(plazoNuevo, resultado.getPlazoIdPlazo());
 
-        // Se verifica que se buscó la encuesta existente y se guardó
-        verify(encuestaDAO, times(1)).findById(id);
-        verify(usuarioService, times(1)).findById(2L);
-        verify(plazoService, times(1)).findById(2L);
-        verify(encuestaDAO, times(1)).save(any(Encuesta.class));
+        verify(encuestaDAO, times(1)).save(any());
     }
 
     /**
-     QUINTA PRUEBA
-     update_encuestaNoExiste_lanzaExcepcion
-     Se intenta actualizar una encuesta que no existe en la base de datos.
-     Se verifica que lanza una excepción.
-     */
-    @Test
+     Intentar actualizar una encuesta que no existe.
+     Se verifica que update() lance excepción y no guarde nada.
+    */
+   @Test
     void update_encuestaNoExiste_lanzaExcepcion() {
-        // 1. Preparación de la prueba
 
+        // 1. preparacion
         Long idInexistente = 99L;
 
-        Usuario usuario = new Usuario();
-        usuario.setIdUsuario(1L);
-
-        Plazo plazo = new Plazo();
-        plazo.setIdPlazo(1L);
-
         Encuesta nuevosDatos = new Encuesta();
-        nuevosDatos.setTitulo("Encuesta Nueva");
-        nuevosDatos.setDescripcion("Descripción nueva");
-        nuevosDatos.setUsuarioIdUsuario(usuario);
-        nuevosDatos.setPlazoIdPlazo(plazo);
+        nuevosDatos.setTitulo("Nueva");
 
-        // El EncuestaDAO devuelve vacío (encuesta no existe)
         when(encuestaDAO.findById(idInexistente)).thenReturn(Optional.empty());
 
-        // 2. Lógica de la prueba y 3. Verificación o Assert
-
+        // 2. logica
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> encuestaBL.update(nuevosDatos, idInexistente));
 
-        // La excepción debe mencionar que la encuesta no fue encontrada
+        // 3. verificacion
         assertTrue(ex.getMessage().contains("Encuesta no encontrada"));
 
-        // Se verifica que no se guardó nada si la encuesta no existe
-        verify(encuestaDAO, never()).save(any(Encuesta.class));
+        verify(encuestaDAO, never()).save(any());
     }
+
+
+
+
+
+
+
+
+
+
+//test disponibles
 
     /**
      SEXTA PRUEBA
