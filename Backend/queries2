@@ -1,7 +1,7 @@
 -- Datos Usuario
 INSERT INTO usuario (nombre, telefono, correo, carrera, rol, usuario, contrasenia)
-        VALUES ('Rosario Calisaya', '67304790', 'rosa26caly@gmail.com', NULL, 'Administrador',
-        'rosario_calisaya', 'seiya26');
+        VALUES ('Willy', '67304790', 'willy.vargas@ucb.edu.bo', NULL, 'Administrador',
+        'willyvargas', 'willy2025');
 INSERT INTO usuario (nombre, telefono, correo, carrera, rol, usuario, contrasenia)
         VALUES ('Carmen Sánchez', '68969918', 'carmensánchez@gmail.com', 'Ingeniería de Sistemas', 'Director',
         'carmen_sánchez', 'WE1UkLkj8w');
