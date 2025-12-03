@@ -18,7 +18,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * 10 Pruebas unitarias para EncuestaGestionBL
- * Autor: [Tu nombre] pruebas 1..10
+ * Autor: Nicole Rojas pruebas 1..10
  */
 @ExtendWith(MockitoExtension.class)
 class EncuestaGestionBLTest {
