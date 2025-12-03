@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * 4 Pruebas unitarias para CertificadoBL
- * Autor: [Tu nombre] pruebas 1,2,3,4
+ * Autor: Willy Vargas pruebas 1 al 8 
  */
 @ExtendWith(MockitoExtension.class)
 class CertificadoBLTest {

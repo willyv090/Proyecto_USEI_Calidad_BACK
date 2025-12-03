@@ -15,7 +15,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * 2 Pruebas unitarias para TipoProblemaBL
- * Autor: [Tu nombre] pruebas 1,2
+ * Autor: Willy Vargas pruebas 1,2
  */
 @ExtendWith(MockitoExtension.class)
 class TipoProblemaTest {
